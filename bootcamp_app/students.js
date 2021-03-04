@@ -7,8 +7,12 @@ const pool = new Pool({
   database: "bootcampx",
 });
 
+// Values that come from somewhere else
 const cohort = process.argv[2];
 const searchLimit = process.argv[3];
+
+// Store all potentially malicious values in an array
+const values = [`%${cohort}%`, searchLimit];
 
 pool
   .query(
@@ -16,9 +20,9 @@ pool
 SELECT students.id as student_id, students.name as name, cohorts.name as cohort_name
 FROM students
 JOIN cohorts ON cohorts.id = students.cohort_id
-WHERE cohorts.name LIKE '%${cohort}%'
-LIMIT ${searchLimit || 5};
-  `
+WHERE cohorts.name LIKE $1
+LIMIT $2;`,
+    values
   )
   .then((res) => {
     res.rows.forEach((user) => {
